@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+
+# Claude Code local config
+.claude/
+
+# Credentials and keys (NEVER commit)
+*.key
+*.pem
+cosign.key
+cosign.pub
+tls.key
+tls.crt
+.env
+*.local.json
+
+# Temporary files
+*.bak
+*.tmp
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Kubernetes local files
+kubeconfig
+*.kubeconfig
+
+# Test outputs
+kube-bench-master.txt
+kube-bench-node.txt
+nginx-results.json
+sbom-*.json
+
+# Docker/registry temp
+Dockerfile.bad
+Dockerfile.good

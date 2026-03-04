@@ -1,0 +1,91 @@
+{
+  "meta": {
+    "lastUpdated": "2026-02-27",
+    "cluster": "k8s-master (192.168.1.40) + k8s-agent (192.168.1.41)",
+    "k8sVersion": "v1.35.1",
+    "examTarget": "CKS — 3-day sprint"
+  },
+  "character": {
+    "class": "Kubernetes Security Engineer",
+    "subclass": "CTF-Hacker-turned-Defender",
+    "totalXP": 470,
+    "maxXP": 1600,
+    "level": 4,
+    "traits": [
+      { "name": "CKA Certified", "bonus": "+10% XP on cluster mechanics" },
+      { "name": "CTF / webapp hacking", "bonus": "+15% XP on attack-vector questions" },
+      { "name": "SecNumCloud / ISO 27001", "bonus": "+10% XP on supply chain topics" },
+      { "name": "Daily securityContext usage", "bonus": "+5% XP on pod hardening labs" }
+    ],
+    "debuffs": []
+  },
+  "skills": [
+    { "name": "Network Policies",       "level": 3, "maxLevel": 10, "status": "unlocked", "notes": "Solid fundamentals. Missed AND/OR YAML trap." },
+    { "name": "RBAC",                   "level": 3, "maxLevel": 10, "status": "unlocked", "notes": "Completed. Good concept understanding. Needed retries on naming + RoleBinding subject mismatch." },
+    { "name": "ServiceAccounts",        "level": 3, "maxLevel": 10, "status": "unlocked", "notes": "Completed. Strong attack-path thinking. Caught resourceNames mistake. Verified Calico permissions hands-on." },
+    { "name": "API Server Hardening",   "level": 3, "maxLevel": 10, "status": "unlocked", "notes": "Clean execution. Hardened kube-apiserver (anonymous-auth, profiling, admission plugins), verified kubelet Webhook auth, blocked metadata endpoint." },
+    { "name": "Pod Security Standards", "level": 3, "maxLevel": 10, "status": "unlocked", "notes": "Strong grasp of PSA concepts (warn/enforce/audit modes). Demonstrated real-world thinking on kube-system hardening." },
+    { "name": "Secrets / etcd Encryption","level": 2, "maxLevel": 10, "status": "unlocked", "notes": "Enabled AES-CBC encryption in etcd. Demonstrated plaintext secrets vulnerability via etcdctl, configured encryption provider, re-encrypted all existing secrets. Exec issues from LAB-16 didn't block learning." },
+    { "name": "AppArmor",               "level": 2, "maxLevel": 10, "status": "unlocked", "notes": "Mastered AppArmor concepts. Fixed critical pod-spec placement bug (container-level vs pod-level securityContext). Debugged exec issues. Verified enforcement via crictl." },
+    { "name": "Seccomp",                "level": 2, "maxLevel": 10, "status": "unlocked", "notes": "All seccomp profile types deployed and tested. Custom profiles blocking chmod confirmed via crictl. Enabled RuntimeDefault cluster-wide on master." },
+    { "name": "Audit Logging",          "level": 3, "maxLevel": 10, "status": "unlocked", "notes": "Clean execution. Quick grasp of jq filtering; understood audit policy configuration and log analysis. Demonstrated diagnostic thinking on distinguishing transient vs real RBAC issues." },
+    { "name": "Immutable Containers",   "level": 0, "maxLevel": 10, "status": "locked",   "notes": "" },
+    { "name": "Falco Runtime Security", "level": 0, "maxLevel": 10, "status": "locked",   "notes": "" },
+    { "name": "Trivy Image Scanning",   "level": 0, "maxLevel": 10, "status": "locked",   "notes": "" },
+    { "name": "CIS Benchmark",          "level": 0, "maxLevel": 10, "status": "locked",   "notes": "" },
+    { "name": "Ingress TLS",            "level": 0, "maxLevel": 10, "status": "locked",   "notes": "" },
+    { "name": "Image Signing (cosign)", "level": 0, "maxLevel": 10, "status": "locked",   "notes": "" },
+    { "name": "Static Analysis (kubesec)","level": 0, "maxLevel": 10, "status": "locked", "notes": "" }
+  ],
+  "clusterTools": [
+    { "name": "k8s-master",    "version": "192.168.1.40", "status": "ready" },
+    { "name": "k8s-agent",     "version": "192.168.1.41", "status": "ready" },
+    { "name": "Calico CNI",    "version": "",             "status": "running" },
+    { "name": "kube-bench",    "version": "v0.10.1",      "status": "installed" },
+    { "name": "trivy",         "version": "v0.69.1",      "status": "installed" },
+    { "name": "helm",          "version": "v3.20.0",      "status": "installed" },
+    { "name": "cosign",        "version": "v3.0.5",       "status": "installed" },
+    { "name": "kubesec",       "version": "v2.14.2",      "status": "installed" },
+    { "name": "falco (master)","version": "v0.43.0",      "status": "active" },
+    { "name": "falco (agent)", "version": "v0.43.0",      "status": "active" }
+  ],
+  "labs": [
+    {
+      "day": 1,
+      "dayTitle": "Cluster Setup & Hardening",
+      "dayWeight": "30%",
+      "items": [
+        { "id": "LAB-01", "name": "Network Policies",        "domain": "Cluster Setup",     "weight": "15%", "status": "done",        "score": "3/4", "notes": "Q2 AND vs OR trap missed" },
+        { "id": "LAB-02", "name": "RBAC least-privilege",    "domain": "Cluster Hardening", "weight": "15%", "status": "done",        "score": "3/4", "notes": "Retries on naming + RoleBinding subject mismatch. Good audit skills." },
+        { "id": "LAB-03", "name": "ServiceAccount hardening","domain": "Cluster Hardening", "weight": "15%", "status": "done",        "score": "4/4", "notes": "Good attack surface awareness. Caught resourceNames trap. Investigated Calico perms." },
+        { "id": "LAB-16", "name": "API Server hardening",    "domain": "Cluster Hardening", "weight": "15%", "status": "done",        "score": "6/6", "notes": "Hardened kube-apiserver (anonymous-auth, profiling, admission plugins), verified kubelet Webhook auth, blocked cloud metadata endpoint. Clean execution." }
+      ]
+    },
+    {
+      "day": 2,
+      "dayTitle": "Microservice Vulnerabilities & System Hardening",
+      "dayWeight": "30%",
+      "items": [
+        { "id": "LAB-04", "name": "Pod Security Standards",    "domain": "Minimize Vulns",   "weight": "20%", "status": "done", "score": "5/5", "notes": "Strong grasp of PSA concepts (warn/enforce/audit modes). Demonstrated real-world thinking on kube-system hardening." },
+        { "id": "LAB-05", "name": "Secrets + etcd encryption", "domain": "Minimize Vulns",   "weight": "20%", "status": "done", "score": "3/4", "notes": "Enabled AES-CBC etcd encryption. Demonstrated plaintext secrets in etcd, re-encrypted all existing secrets. Exec issue from LAB-16 kubelet auth didn't block learning." },
+        { "id": "LAB-06", "name": "AppArmor",                  "domain": "System Hardening", "weight": "10%", "status": "done", "score": "4/4", "notes": "Mastered AppArmor concepts. Fixed critical pod-spec placement bug (container-level vs pod-level securityContext). Debugged exec issues. Verified enforcement via crictl." },
+        { "id": "LAB-07", "name": "Seccomp",                   "domain": "System Hardening", "weight": "10%", "status": "done", "score": "5/5", "notes": "All seccomp profile types deployed and tested. Custom profiles blocking chmod confirmed via crictl. Enabled RuntimeDefault cluster-wide on master." },
+        { "id": "LAB-08", "name": "Audit Logging",             "domain": "Monitoring",       "weight": "20%", "status": "done", "score": "6/6", "notes": "Clean execution. Quick grasp of jq filtering; understood audit policy configuration and log analysis. Demonstrated diagnostic thinking on distinguishing transient vs real RBAC issues." },
+        { "id": "LAB-15", "name": "Immutable containers",      "domain": "Monitoring",       "weight": "20%", "status": "pending", "score": "", "notes": "" }
+      ]
+    },
+    {
+      "day": 3,
+      "dayTitle": "Supply Chain & Runtime Security",
+      "dayWeight": "40%",
+      "items": [
+        { "id": "LAB-09", "name": "Falco runtime security",    "domain": "Monitoring",     "weight": "20%", "status": "pending", "score": "", "notes": "" },
+        { "id": "LAB-10", "name": "Trivy image scanning",      "domain": "Supply Chain",   "weight": "20%", "status": "pending", "score": "", "notes": "" },
+        { "id": "LAB-11", "name": "CIS Benchmark kube-bench",  "domain": "Cluster Setup",  "weight": "15%", "status": "pending", "score": "", "notes": "" },
+        { "id": "LAB-12", "name": "Ingress with TLS",          "domain": "Cluster Setup",  "weight": "15%", "status": "pending", "score": "", "notes": "" },
+        { "id": "LAB-13", "name": "Image signing cosign",      "domain": "Supply Chain",   "weight": "20%", "status": "pending", "score": "", "notes": "" },
+        { "id": "LAB-14", "name": "Static analysis kubesec",   "domain": "Supply Chain",   "weight": "20%", "status": "pending", "score": "", "notes": "" }
+      ]
+    }
+  ]
+}

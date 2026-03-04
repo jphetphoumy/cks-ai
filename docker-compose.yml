@@ -1,0 +1,9 @@
+services:
+  roadmap:
+    build: ./app-roadmap
+    container_name: cks-roadmap
+    ports:
+      - "8080:80"
+    volumes:
+      - ./app-roadmap/data.json:/usr/share/nginx/html/data.json:ro
+    restart: unless-stopped

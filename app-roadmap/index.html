@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CKS — Character Sheet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              900: '#0f172a',
+              800: '#1e293b',
+              700: '#334155',
+              600: '#475569',
+            }
+          },
+          fontFamily: {
+            mono: ['JetBrains Mono', 'Fira Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'JetBrains Mono', 'Fira Mono', monospace; }
+    .skill-bar-fill { transition: width 0.8s cubic-bezier(.4,0,.2,1); }
+    .xp-bar-fill   { transition: width 1s cubic-bezier(.4,0,.2,1); }
+    .card { @apply bg-slate-800 border border-slate-700 rounded-xl p-5; }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+
+  <!-- Header -->
+  <header class="border-b border-slate-700 bg-slate-800/80 backdrop-blur sticky top-0 z-10">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div>
+        <h1 class="text-xl font-bold text-cyan-400 tracking-tight">CKS — Character Sheet</h1>
+        <p id="meta-sub" class="text-xs text-slate-400 mt-0.5"></p>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-1.5 text-xs text-slate-500">
+          <span id="live-dot" class="w-2 h-2 rounded-full bg-slate-600 transition-colors duration-300"></span>
+          live
+        </div>
+        <span id="meta-date" class="text-xs text-slate-500"></span>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-6 py-8 space-y-8">
+
+    <!-- Character Overview -->
+    <section id="character-section" class="bg-slate-800 border border-slate-700 rounded-xl p-6">
+      <div class="flex flex-col sm:flex-row sm:items-center gap-6">
+
+        <!-- Avatar placeholder -->
+        <div class="flex-shrink-0 w-20 h-20 rounded-full bg-gradient-to-br from-cyan-500 to-blue-700 flex items-center justify-center text-3xl select-none">
+          &#x1F6E1;
+        </div>
+
+        <!-- Identity -->
+        <div class="flex-1 min-w-0">
+          <div class="flex flex-wrap items-baseline gap-3">
+            <h2 id="char-class" class="text-lg font-bold text-white"></h2>
+            <span id="char-level" class="px-2 py-0.5 rounded bg-cyan-900 text-cyan-300 text-xs font-bold"></span>
+          </div>
+          <p id="char-subclass" class="text-sm text-slate-400 mt-1"></p>
+
+          <!-- XP bar -->
+          <div class="mt-4">
+            <div class="flex justify-between text-xs text-slate-400 mb-1">
+              <span>Total XP</span>
+              <span id="xp-label"></span>
+            </div>
+            <div class="h-3 bg-slate-700 rounded-full overflow-hidden">
+              <div id="xp-bar" class="xp-bar-fill h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full" style="width:0%"></div>
+            </div>
+            <p id="xp-pct" class="text-xs text-slate-500 mt-1 text-right"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Two-column: Skills + Traits/Debuffs -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+      <!-- Skill Tree (2/3) -->
+      <section class="lg:col-span-2 bg-slate-800 border border-slate-700 rounded-xl p-6">
+        <h3 class="text-sm font-bold text-slate-300 uppercase tracking-widest mb-5">Skill Tree</h3>
+        <div id="skill-list" class="space-y-3"></div>
+      </section>
+
+      <!-- Traits + Debuffs (1/3) -->
+      <div class="space-y-6">
+
+        <!-- Passive Traits -->
+        <section class="bg-slate-800 border border-slate-700 rounded-xl p-6">
+          <h3 class="text-sm font-bold text-slate-300 uppercase tracking-widest mb-4">Passive Traits</h3>
+          <ul id="trait-list" class="space-y-3"></ul>
+        </section>
+
+        <!-- Debuffs -->
+        <section class="bg-slate-800 border border-red-900/50 rounded-xl p-6">
+          <h3 class="text-sm font-bold text-red-400 uppercase tracking-widest mb-4">Active Debuffs</h3>
+          <ul id="debuff-list" class="space-y-4"></ul>
+        </section>
+
+        <!-- Cluster Tools -->
+        <section class="bg-slate-800 border border-slate-700 rounded-xl p-6">
+          <h3 class="text-sm font-bold text-slate-300 uppercase tracking-widest mb-4">Cluster Tools</h3>
+          <ul id="tool-list" class="space-y-2"></ul>
+        </section>
+
+      </div>
+    </div>
+
+    <!-- Lab Progress by Day -->
+    <section>
+      <h3 class="text-sm font-bold text-slate-300 uppercase tracking-widest mb-5">Lab Progress</h3>
+      <div id="lab-days" class="space-y-6"></div>
+    </section>
+
+  </main>
+
+  <script>
+    let _lastHash = null;
+
+    async function fetchData() {
+      const res = await fetch('./data.json?_=' + Date.now());
+      const text = await res.text();
+      return { text, data: JSON.parse(text) };
+    }
+
+    async function poll() {
+      try {
+        const { text, data } = await fetchData();
+        if (text !== _lastHash) {
+          _lastHash = text;
+          document.getElementById('skill-list').innerHTML = '';
+          document.getElementById('trait-list').innerHTML = '';
+          document.getElementById('debuff-list').innerHTML = '';
+          document.getElementById('tool-list').innerHTML = '';
+          document.getElementById('lab-days').innerHTML = '';
+          render(data);
+          flashIndicator();
+        }
+      } catch (e) { /* silently ignore fetch errors */ }
+    }
+
+    function flashIndicator() {
+      const el = document.getElementById('live-dot');
+      el.classList.add('bg-green-400');
+      el.classList.remove('bg-slate-600');
+      setTimeout(() => {
+        el.classList.remove('bg-green-400');
+        el.classList.add('bg-slate-600');
+      }, 800);
+    }
+
+    poll();
+    setInterval(poll, 3000);
+
+    function render(d) {
+      // Meta
+      document.getElementById('meta-sub').textContent = d.meta.cluster + ' · ' + d.meta.k8sVersion;
+      document.getElementById('meta-date').textContent = 'Updated: ' + d.meta.lastUpdated;
+
+      // Character
+      const c = d.character;
+      document.getElementById('char-class').textContent = c.class;
+      document.getElementById('char-subclass').textContent = c.subclass;
+      document.getElementById('char-level').textContent = 'LVL ' + c.level;
+      document.getElementById('xp-label').textContent = c.totalXP + ' / ' + c.maxXP + ' XP';
+      const pct = (c.totalXP / c.maxXP * 100).toFixed(1);
+      document.getElementById('xp-pct').textContent = pct + '% to CKS Certification';
+      setTimeout(() => {
+        document.getElementById('xp-bar').style.width = pct + '%';
+      }, 100);
+
+      // Skills
+      const skillList = document.getElementById('skill-list');
+      d.skills.forEach(s => {
+        const pct = (s.level / s.maxLevel * 100);
+        const locked = s.status === 'locked';
+        const inprog = s.status === 'in_progress';
+        const color = locked ? 'bg-slate-600' : inprog ? 'bg-yellow-500' : 'bg-cyan-500';
+        const textColor = locked ? 'text-slate-500' : inprog ? 'text-yellow-300' : 'text-slate-200';
+        const badge = locked
+          ? '<span class="text-xs text-slate-600 ml-2">locked</span>'
+          : inprog
+          ? '<span class="text-xs text-yellow-500 ml-2">in progress</span>'
+          : '';
+
+        skillList.innerHTML += `
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-sm ${textColor} flex items-center gap-1">
+                ${s.name}${badge}
+              </span>
+              <span class="text-xs ${locked ? 'text-slate-600' : 'text-slate-400'}">${s.level} / ${s.maxLevel}</span>
+            </div>
+            <div class="h-2 bg-slate-700 rounded-full overflow-hidden">
+              <div class="skill-bar-fill h-full ${color} rounded-full" style="width:0%" data-pct="${pct}"></div>
+            </div>
+            ${s.notes && !locked ? `<p class="text-xs text-slate-500 mt-0.5">${s.notes}</p>` : ''}
+          </div>`;
+      });
+      // Animate after paint
+      setTimeout(() => {
+        document.querySelectorAll('.skill-bar-fill').forEach(el => {
+          el.style.width = el.dataset.pct + '%';
+        });
+      }, 150);
+
+      // Traits
+      const traitList = document.getElementById('trait-list');
+      d.character.traits.forEach(t => {
+        traitList.innerHTML += `
+          <li class="flex items-start gap-2">
+            <span class="text-green-400 mt-0.5">+</span>
+            <div>
+              <p class="text-sm text-slate-200">${t.name}</p>
+              <p class="text-xs text-green-400">${t.bonus}</p>
+            </div>
+          </li>`;
+      });
+
+      // Debuffs
+      const debuffList = document.getElementById('debuff-list');
+      if (d.character.debuffs.length === 0) {
+        debuffList.innerHTML = '<li class="text-xs text-slate-500 italic">No active debuffs</li>';
+      } else {
+        d.character.debuffs.forEach(db => {
+          debuffList.innerHTML += `
+            <li class="border border-red-900/40 rounded-lg p-3 bg-red-950/20">
+              <p class="text-sm font-bold text-red-400">${db.name}</p>
+              <p class="text-xs text-slate-400 mt-1">${db.effect}</p>
+              <p class="text-xs text-slate-500 mt-1">Cure: <span class="text-slate-300">${db.cure}</span></p>
+            </li>`;
+        });
+      }
+
+      // Cluster Tools
+      const toolList = document.getElementById('tool-list');
+      d.clusterTools.forEach(t => {
+        const dot = t.status === 'ready' || t.status === 'running' || t.status === 'active' || t.status === 'installed'
+          ? 'bg-green-500'
+          : 'bg-slate-600';
+        toolList.innerHTML += `
+          <li class="flex items-center justify-between text-xs">
+            <span class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full ${dot} inline-block"></span>
+              <span class="text-slate-300">${t.name}</span>
+            </span>
+            <span class="text-slate-500">${t.version}</span>
+          </li>`;
+      });
+
+      // Labs
+      const labDays = document.getElementById('lab-days');
+      d.labs.forEach(day => {
+        const done     = day.items.filter(i => i.status === 'done').length;
+        const total    = day.items.length;
+        const dayPct   = Math.round(done / total * 100);
+
+        const rows = day.items.map(lab => {
+          const statusConfig = {
+            done:        { dot: 'bg-green-500',  text: 'text-green-400',  label: '✓ Done' },
+            in_progress: { dot: 'bg-yellow-400', text: 'text-yellow-300', label: '⟳ In Progress' },
+            pending:     { dot: 'bg-slate-600',  text: 'text-slate-500',  label: '— Pending' },
+          };
+          const sc = statusConfig[lab.status] || statusConfig.pending;
+          const scoreTag = lab.score
+            ? `<span class="ml-2 text-xs px-1.5 py-0.5 rounded bg-slate-700 text-slate-300">${lab.score}</span>`
+            : '';
+          const notesTag = lab.notes
+            ? `<span class="text-xs text-slate-500 ml-2">${lab.notes}</span>`
+            : '';
+
+          return `
+            <tr class="border-b border-slate-700/50 last:border-0 hover:bg-slate-700/30 transition-colors">
+              <td class="py-2.5 pr-4 text-xs font-bold text-slate-400 whitespace-nowrap">${lab.id}</td>
+              <td class="py-2.5 pr-4 text-sm text-slate-200">
+                ${lab.name}${scoreTag}${notesTag}
+              </td>
+              <td class="py-2.5 pr-4 text-xs text-slate-400 hidden sm:table-cell">${lab.domain}</td>
+              <td class="py-2.5 pr-4 text-xs text-slate-400 hidden md:table-cell">${lab.weight}</td>
+              <td class="py-2.5 text-xs ${sc.text} whitespace-nowrap">
+                <span class="inline-flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full ${sc.dot}"></span>
+                  ${sc.label}
+                </span>
+              </td>
+            </tr>`;
+        }).join('');
+
+        labDays.innerHTML += `
+          <div class="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-700 flex items-center justify-between">
+              <div>
+                <h4 class="font-bold text-white">Day ${day.day} — ${day.dayTitle}</h4>
+                <p class="text-xs text-slate-400 mt-0.5">${day.dayWeight} of exam · ${done}/${total} labs done</p>
+              </div>
+              <div class="text-right">
+                <div class="text-sm font-bold ${dayPct === 100 ? 'text-green-400' : 'text-slate-300'}">${dayPct}%</div>
+                <div class="w-24 h-1.5 bg-slate-700 rounded-full mt-1 overflow-hidden">
+                  <div class="h-full bg-cyan-500 rounded-full" style="width:${dayPct}%"></div>
+                </div>
+              </div>
+            </div>
+            <div class="px-6 py-2 overflow-x-auto">
+              <table class="w-full">
+                <tbody>${rows}</tbody>
+              </table>
+            </div>
+          </div>`;
+      });
+    } // end render
+  </script>
+</body>
+</html>
