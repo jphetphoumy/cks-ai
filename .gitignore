@@ -1,8 +1,12 @@
 # Dependencies
 node_modules/
 
-# Claude Code local config
-.claude/
+# Claude Code — track skills and commands, ignore local config
+.claude/*
+!.claude/skills/
+!.claude/commands/
+.claude/settings.local.json
+.claude/node_modules/
 
 # Credentials and keys (NEVER commit)
 *.key
@@ -13,6 +17,9 @@ tls.key
 tls.crt
 .env
 *.local.json
+
+# Local node addresses / SSH user (copy from nodes.env.example)
+nodes.env
 
 # Temporary files
 *.bak

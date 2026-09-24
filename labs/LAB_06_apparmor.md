@@ -24,7 +24,7 @@ AppArmor is a Linux Mandatory Access Control (MAC) system. It restricts what a p
 
 2. Check on worker node:
    ```bash
-   ssh 192.168.1.41 "sudo aa-status"
+   ssh $AGENT_IP "sudo aa-status"
    ```
 
 3. Look at an existing profile for syntax reference:
@@ -34,9 +34,9 @@ AppArmor is a Linux Mandatory Access Control (MAC) system. It restricts what a p
 
 ### Part B — Write a custom deny-write profile
 
-4. Create the profile on the **worker node (192.168.1.41)**:
+4. Create the profile on the **worker node ($AGENT_IP)**:
    ```bash
-   ssh 192.168.1.41 "sudo tee /etc/apparmor.d/k8s-deny-write << 'EOF'
+   ssh $AGENT_IP "sudo tee /etc/apparmor.d/k8s-deny-write << 'EOF'
    #include <tunables/global>
 
    profile k8s-deny-write flags=(attach_disconnected) {
@@ -61,12 +61,12 @@ AppArmor is a Linux Mandatory Access Control (MAC) system. It restricts what a p
 
 5. Load the profile on the worker node:
    ```bash
-   ssh 192.168.1.41 "sudo apparmor_parser -r /etc/apparmor.d/k8s-deny-write"
+   ssh $AGENT_IP "sudo apparmor_parser -r /etc/apparmor.d/k8s-deny-write"
    ```
 
 6. Verify it's in enforce mode:
    ```bash
-   ssh 192.168.1.41 "sudo aa-status | grep k8s-deny-write"
+   ssh $AGENT_IP "sudo aa-status | grep k8s-deny-write"
    ```
 
 ### Part C — Apply profile to pod (K8s 1.30+ syntax)
@@ -133,20 +133,20 @@ AppArmor is a Linux Mandatory Access Control (MAC) system. It restricts what a p
 
 11. Switch to complain mode (logs but doesn't block):
     ```bash
-    ssh 192.168.1.41 "sudo aa-complain /etc/apparmor.d/k8s-deny-write"
-    ssh 192.168.1.41 "sudo aa-status | grep -A1 complain"
+    ssh $AGENT_IP "sudo aa-complain /etc/apparmor.d/k8s-deny-write"
+    ssh $AGENT_IP "sudo aa-status | grep -A1 complain"
     ```
 
 12. Switch back to enforce:
     ```bash
-    ssh 192.168.1.41 "sudo aa-enforce /etc/apparmor.d/k8s-deny-write"
+    ssh $AGENT_IP "sudo aa-enforce /etc/apparmor.d/k8s-deny-write"
     ```
 
 ### Part F — Exam scenario: realistic profile
 
 13. Write a profile allowing only reads from `/data/`, denying writes and raw sockets:
     ```bash
-    ssh 192.168.1.41 "sudo tee /etc/apparmor.d/k8s-data-reader << 'EOF'
+    ssh $AGENT_IP "sudo tee /etc/apparmor.d/k8s-data-reader << 'EOF'
     #include <tunables/global>
 
     profile k8s-data-reader flags=(attach_disconnected) {
@@ -161,14 +161,14 @@ AppArmor is a Linux Mandatory Access Control (MAC) system. It restricts what a p
       /lib/** mr,
     }
     EOF"
-    ssh 192.168.1.41 "sudo apparmor_parser -r /etc/apparmor.d/k8s-data-reader"
-    ssh 192.168.1.41 "sudo aa-status | grep k8s-data-reader"
+    ssh $AGENT_IP "sudo apparmor_parser -r /etc/apparmor.d/k8s-data-reader"
+    ssh $AGENT_IP "sudo aa-status | grep k8s-data-reader"
     ```
 
 ## Validation
 ```bash
 # Profile loaded on worker node
-ssh 192.168.1.41 "sudo aa-status | grep k8s-deny-write"  # enforce mode
+ssh $AGENT_IP "sudo aa-status | grep k8s-deny-write"  # enforce mode
 
 # Pod running
 kubectl get pod apparmor-pod  # Running

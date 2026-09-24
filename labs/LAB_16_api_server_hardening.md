@@ -34,7 +34,7 @@ The kube-apiserver is the cluster's central control plane component. Misconfigur
 
 3. Test anonymous API access:
    ```bash
-   curl -k https://192.168.1.40:6443/api/v1/namespaces
+   curl -k https://$MASTER_IP:6443/api/v1/namespaces
    ```
    Should return 401/403 — not actual data.
 
@@ -64,7 +64,7 @@ The kube-apiserver is the cluster's central control plane component. Misconfigur
 
 7. Verify anonymous access is blocked:
    ```bash
-   curl -k https://192.168.1.40:6443/api/v1/namespaces
+   curl -k https://$MASTER_IP:6443/api/v1/namespaces
    # Should return 403 Forbidden
    ```
 
@@ -77,7 +77,7 @@ The kube-apiserver is the cluster's central control plane component. Misconfigur
 
 9. Check kubelet on worker:
    ```bash
-   ssh 192.168.1.41 "sudo cat /var/lib/kubelet/config.yaml"
+   ssh $AGENT_IP "sudo cat /var/lib/kubelet/config.yaml"
    ```
 
 10. Verify critical kubelet settings on both nodes:
@@ -96,25 +96,25 @@ The kube-apiserver is the cluster's central control plane component. Misconfigur
 11. Fix on worker node if needed:
     ```bash
     # Fix authorization if AlwaysAllow
-    ssh 192.168.1.41 "sudo grep -A3 'authorization:' /var/lib/kubelet/config.yaml"
-    ssh 192.168.1.41 "sudo sed -i 's/mode: AlwaysAllow/mode: Webhook/g' /var/lib/kubelet/config.yaml"
-    ssh 192.168.1.41 "sudo systemctl restart kubelet"
+    ssh $AGENT_IP "sudo grep -A3 'authorization:' /var/lib/kubelet/config.yaml"
+    ssh $AGENT_IP "sudo sed -i 's/mode: AlwaysAllow/mode: Webhook/g' /var/lib/kubelet/config.yaml"
+    ssh $AGENT_IP "sudo systemctl restart kubelet"
 
     # Disable read-only port
-    ssh 192.168.1.41 "grep -q readOnlyPort /var/lib/kubelet/config.yaml && \
+    ssh $AGENT_IP "grep -q readOnlyPort /var/lib/kubelet/config.yaml && \
       sudo sed -i 's/readOnlyPort:.*/readOnlyPort: 0/' /var/lib/kubelet/config.yaml || \
       echo 'readOnlyPort: 0' | sudo tee -a /var/lib/kubelet/config.yaml"
-    ssh 192.168.1.41 "sudo systemctl restart kubelet"
+    ssh $AGENT_IP "sudo systemctl restart kubelet"
 
     # Add protectKernelDefaults
-    ssh 192.168.1.41 "grep -q protectKernelDefaults /var/lib/kubelet/config.yaml || \
+    ssh $AGENT_IP "grep -q protectKernelDefaults /var/lib/kubelet/config.yaml || \
       echo 'protectKernelDefaults: true' | sudo tee -a /var/lib/kubelet/config.yaml"
-    ssh 192.168.1.41 "sudo systemctl restart kubelet"
+    ssh $AGENT_IP "sudo systemctl restart kubelet"
     ```
 
 12. Verify kubelet port 10255 is closed:
     ```bash
-    curl http://192.168.1.41:10255/metrics 2>&1 | head -3
+    curl http://$AGENT_IP:10255/metrics 2>&1 | head -3
     # Should fail / timeout
     ```
 
@@ -197,7 +197,7 @@ The kube-apiserver is the cluster's central control plane component. Misconfigur
     # Add: --anonymous-auth=false
 
     # 2. Fix kubelet authorization on worker
-    ssh 192.168.1.41 "sudo sed -i 's/mode: AlwaysAllow/mode: Webhook/' \
+    ssh $AGENT_IP "sudo sed -i 's/mode: AlwaysAllow/mode: Webhook/' \
       /var/lib/kubelet/config.yaml && sudo systemctl restart kubelet"
 
     # 3. Remove dangerous ClusterRoleBinding
@@ -205,16 +205,16 @@ The kube-apiserver is the cluster's central control plane component. Misconfigur
 
     # 4. Verify cluster still works
     kubectl get nodes
-    curl -k https://192.168.1.40:6443/api  # 403
+    curl -k https://$MASTER_IP:6443/api  # 403
     ```
 
 ## Validation
 ```bash
 # Anonymous access blocked
-curl -k https://192.168.1.40:6443/api/v1/namespaces 2>&1 | grep -E "403|Forbidden|401"
+curl -k https://$MASTER_IP:6443/api/v1/namespaces 2>&1 | grep -E "403|Forbidden|401"
 
 # Kubelet uses Webhook authorization
-ssh 192.168.1.41 "grep -A3 'authorization:' /var/lib/kubelet/config.yaml | grep Webhook"
+ssh $AGENT_IP "grep -A3 'authorization:' /var/lib/kubelet/config.yaml | grep Webhook"
 
 # No dangerous anonymous bindings
 kubectl get clusterrolebindings -o json | python3 -c "

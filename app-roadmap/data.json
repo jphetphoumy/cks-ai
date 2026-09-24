@@ -1,7 +1,7 @@
 {
   "meta": {
     "lastUpdated": "2026-02-27",
-    "cluster": "k8s-master (192.168.1.40) + k8s-agent (192.168.1.41)",
+    "cluster": "k8s-master + k8s-agent",
     "k8sVersion": "v1.35.1",
     "examTarget": "CKS — 3-day sprint"
   },
@@ -38,8 +38,8 @@
     { "name": "Static Analysis (kubesec)","level": 0, "maxLevel": 10, "status": "locked", "notes": "" }
   ],
   "clusterTools": [
-    { "name": "k8s-master",    "version": "192.168.1.40", "status": "ready" },
-    { "name": "k8s-agent",     "version": "192.168.1.41", "status": "ready" },
+    { "name": "k8s-master",    "version": "control-plane", "status": "ready" },
+    { "name": "k8s-agent",     "version": "worker",        "status": "ready" },
     { "name": "Calico CNI",    "version": "",             "status": "running" },
     { "name": "kube-bench",    "version": "v0.10.1",      "status": "installed" },
     { "name": "trivy",         "version": "v0.69.1",      "status": "installed" },

@@ -29,11 +29,12 @@
 ## Cluster state
 
 - **Do not recreate or reset the cluster** — it is running and healthy
-- Master: `192.168.1.40` — all tools installed (trivy, helm, cosign, kubesec, kube-bench, falco)
-- Agent: `192.168.1.41` — falco installed
+- Master: `$MASTER_IP` — all tools installed (trivy, helm, cosign, kubesec, kube-bench, falco)
+- Agent: `$AGENT_IP` — falco installed
 - Calico CNI running
-- SSH access: `ssh jphetphoumy@192.168.1.40`
-- Run cluster commands via: `ssh jphetphoumy@192.168.1.40 'sudo bash -s' <<'EOF' ... EOF`
+- Node addresses / SSH user: `. ./nodes.env` (gitignored — see `nodes.env.example`)
+- SSH access: `ssh $SSH_USER@$MASTER_IP`
+- Run cluster commands via: `ssh $SSH_USER@$MASTER_IP 'sudo bash -s' <<'EOF' ... EOF`
 
 ---
 

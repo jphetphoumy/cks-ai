@@ -17,7 +17,7 @@ Falco is a CNCF runtime security tool that hooks into the Linux kernel via eBPF 
 
 ### Part A — Install Falco on both nodes
 
-1. On **k8s-master (192.168.1.40)**:
+1. On **k8s-master ($MASTER_IP)**:
    ```bash
    curl -fsSL https://falco.org/repo/falcosecurity-packages.asc | \
      sudo gpg --dearmor -o /usr/share/keyrings/falco-archive-keyring.gpg
@@ -29,9 +29,9 @@ Falco is a CNCF runtime security tool that hooks into the Linux kernel via eBPF 
    sudo systemctl status falco
    ```
 
-2. On **k8s-agent (192.168.1.41)**:
+2. On **k8s-agent ($AGENT_IP)**:
    ```bash
-   ssh 192.168.1.41 "
+   ssh $AGENT_IP "
    curl -fsSL https://falco.org/repo/falcosecurity-packages.asc | \
      sudo gpg --dearmor -o /usr/share/keyrings/falco-archive-keyring.gpg && \
    echo 'deb [signed-by=/usr/share/keyrings/falco-archive-keyring.gpg] \
@@ -45,7 +45,7 @@ Falco is a CNCF runtime security tool that hooks into the Linux kernel via eBPF 
 3. Verify Falco running on both nodes:
    ```bash
    sudo systemctl status falco
-   ssh 192.168.1.41 "sudo systemctl is-active falco"
+   ssh $AGENT_IP "sudo systemctl is-active falco"
    ```
 
 ### Part B — Trigger built-in rules
@@ -195,7 +195,7 @@ Falco is a CNCF runtime security tool that hooks into the Linux kernel via eBPF 
 ```bash
 # Falco active on both nodes
 sudo systemctl is-active falco  # active
-ssh 192.168.1.41 "sudo systemctl is-active falco"  # active
+ssh $AGENT_IP "sudo systemctl is-active falco"  # active
 
 # Alerts generated on sensitive file read
 kubectl exec trigger-pod -- cat /etc/shadow

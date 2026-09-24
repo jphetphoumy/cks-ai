@@ -107,7 +107,7 @@ Ingress exposes HTTP/HTTPS routes from outside the cluster to services inside. T
     ```bash
     HTTPS_PORT=$(kubectl get svc -n ingress-nginx ingress-nginx-controller \
       -o jsonpath='{.spec.ports[?(@.name=="https")].nodePort}')
-    NODE_IP="192.168.1.41"
+    NODE_IP="$AGENT_IP"
     echo "HTTPS port: $HTTPS_PORT"
     ```
 

@@ -33,7 +33,7 @@ kube-bench version
 
 2. Run worker node checks:
    ```bash
-   ssh 192.168.1.41 "sudo kube-bench run --targets node 2>&1" | tee kube-bench-node.txt
+   ssh $AGENT_IP "sudo kube-bench run --targets node 2>&1" | tee kube-bench-node.txt
    ```
 
 3. Count PASS/FAIL/WARN:
@@ -73,12 +73,12 @@ kube-bench version
 
 9. Check 4.2.1 — Kubelet anonymous auth:
    ```bash
-   ssh 192.168.1.41 "sudo kube-bench run --targets node --check 4.2.1"
+   ssh $AGENT_IP "sudo kube-bench run --targets node --check 4.2.1"
    ```
 
 10. Check 4.2.2 — Kubelet authorization mode:
     ```bash
-    ssh 192.168.1.41 "sudo kube-bench run --targets node --check 4.2.2"
+    ssh $AGENT_IP "sudo kube-bench run --targets node --check 4.2.2"
     ```
 
 ### Part C — Remediate common failures
@@ -99,27 +99,27 @@ kube-bench version
 
 13. Fix: kubelet authorization on worker:
     ```bash
-    ssh 192.168.1.41 "sudo grep -A2 'authorization:' /var/lib/kubelet/config.yaml"
+    ssh $AGENT_IP "sudo grep -A2 'authorization:' /var/lib/kubelet/config.yaml"
     # Should show: mode: Webhook
     # If AlwaysAllow, fix it:
-    ssh 192.168.1.41 "sudo sed -i 's/mode: AlwaysAllow/mode: Webhook/' \
+    ssh $AGENT_IP "sudo sed -i 's/mode: AlwaysAllow/mode: Webhook/' \
       /var/lib/kubelet/config.yaml && sudo systemctl restart kubelet"
     ```
 
 14. Fix: kubelet protectKernelDefaults:
     ```bash
-    ssh 192.168.1.41 "sudo grep protectKernelDefaults /var/lib/kubelet/config.yaml"
+    ssh $AGENT_IP "sudo grep protectKernelDefaults /var/lib/kubelet/config.yaml"
     # If missing:
-    ssh 192.168.1.41 "echo 'protectKernelDefaults: true' | \
+    ssh $AGENT_IP "echo 'protectKernelDefaults: true' | \
       sudo tee -a /var/lib/kubelet/config.yaml && sudo systemctl restart kubelet"
     ```
 
 15. Fix: kubelet readOnlyPort = 0:
     ```bash
-    ssh 192.168.1.41 "grep -q readOnlyPort /var/lib/kubelet/config.yaml && \
+    ssh $AGENT_IP "grep -q readOnlyPort /var/lib/kubelet/config.yaml && \
       sudo sed -i 's/readOnlyPort:.*/readOnlyPort: 0/' /var/lib/kubelet/config.yaml || \
       echo 'readOnlyPort: 0' | sudo tee -a /var/lib/kubelet/config.yaml"
-    ssh 192.168.1.41 "sudo systemctl restart kubelet"
+    ssh $AGENT_IP "sudo systemctl restart kubelet"
     ```
 
 ### Part D — Re-run after fixes

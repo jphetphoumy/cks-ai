@@ -31,6 +31,50 @@ This repository contains a structured learning path for the **Certified Kubernet
 3. Use the skill commands (e.g., `cks-lab`, `cks-validate`) for interactive guidance
 4. Track progress in **ROADMAP.md**
 
+## Node Configuration
+
+Nothing in this repo hardcodes real node addresses. The labs, skills and `setup.sh` all
+refer to `$MASTER_IP`, `$AGENT_IP` and `$SSH_USER`, which come from a **gitignored**
+`nodes.env` at the repo root:
+
+```bash
+cp nodes.env.example nodes.env
+$EDITOR nodes.env       # set MASTER_IP, AGENT_IP, SSH_USER
+. ./nodes.env           # source it before running lab commands by hand
+```
+
+`nodes.env.example` is tracked and carries placeholders (`10.0.0.10` / `10.0.0.11`).
+`.claude/skills/cks-setup/setup.sh` sources `nodes.env` automatically and fails fast
+with a clear message if it is missing. Keep your real addresses, hostnames and SSH user
+in `nodes.env` only — never in a tracked file.
+
+## Claude Code Setup
+
+The `.claude/skills/` and `.claude/commands/` directories **are** tracked in git — they provide the interactive tutor (`cks-lab`, `cks-validate`, `cks-complete`, `cks-exam`, `cks-setup`, …).
+
+`.claude/settings.local.json` is **not** tracked — it holds machine-local permission grants (SSH to the lab nodes, skill invocations). Create your own after cloning:
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(ssh -o StrictHostKeyChecking=no 10.0.0.10:*)",
+      "Bash(ssh -o StrictHostKeyChecking=no 10.0.0.11:*)",
+      "Skill(cks-setup)",
+      "Skill(cks-lab)",
+      "Skill(cks-validate)",
+      "Skill(cks-complete)",
+      "Skill(cks-exam)",
+      "Skill(kubectl-exec-debug)"
+    ]
+  }
+}
+```
+
+Replace `10.0.0.10` / `10.0.0.11` with the addresses you put in `nodes.env`. Bash allow-rules are **prefix matches** against the literal command string — they cannot read `$MASTER_IP`, so the real addresses go here, in this local, untracked file. Pin them to those two VMs. Avoid a blanket `Bash(ssh:*)` — the labs run `sudo` on the far end, so that rule is standing approval to run anything as root on *any* host you can reach, not just the throwaway lab nodes. Match the exact command form the skills use (including the flags before the host) or the rule won't fire; add a second line for a bare `ssh <node-ip>:*` form if you also use it.
+
+Without this file, Claude Code just prompts for approval on each SSH command and skill invocation — it only saves you the clicks. Keep it out of git: it is environment-specific (lab IPs) and ignored via `*.local.json`.
+
 ## Requirements
 
 - Kubernetes cluster (2 nodes: k8s-master, k8s-agent)

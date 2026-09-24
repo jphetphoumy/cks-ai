@@ -1,6 +1,6 @@
 # CKS Labs - Current Cluster Capabilities
 
-> Cluster: k8s-master (192.168.1.40) + k8s-agent (192.168.1.41)
+> Cluster: k8s-master ($MASTER_IP) + k8s-agent ($AGENT_IP)
 > K8s: v1.35.1 | OS: Debian 12 | Runtime: containerd 2.2.1
 > Status: Nodes NotReady (no CNI) — install CNI first before all labs
 

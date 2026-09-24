@@ -39,7 +39,7 @@ cosign version
    kubectl run registry --image=registry:2 --port=5000 --restart=Never
    kubectl expose pod registry --port=5000 --type=NodePort
    REGISTRY_PORT=$(kubectl get svc registry -o jsonpath='{.spec.ports[0].nodePort}')
-   REGISTRY="192.168.1.40:$REGISTRY_PORT"
+   REGISTRY="$MASTER_IP:$REGISTRY_PORT"
    echo "Registry: $REGISTRY"
    ```
 
@@ -48,7 +48,7 @@ cosign version
    docker pull alpine:3.19
    docker tag alpine:3.19 $REGISTRY/alpine:signed
    # Configure insecure registry if needed:
-   # echo '{"insecure-registries": ["192.168.1.40:'$REGISTRY_PORT'"]}' | sudo tee /etc/docker/daemon.json
+   # echo '{"insecure-registries": ["$MASTER_IP:'$REGISTRY_PORT'"]}' | sudo tee /etc/docker/daemon.json
    # sudo systemctl restart docker
    docker push $REGISTRY/alpine:signed
    ```

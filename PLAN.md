@@ -11,8 +11,8 @@
 | Step | Action | Status |
 |------|--------|--------|
 | 1 | Install Calico CNI → @labs/LAB_00_install_cni.md | ✅ Done — both nodes Ready, calico-system Running |
-| 2 | Install kube-bench, Trivy, Helm, cosign, kubesec on k8s-master (192.168.1.40) | ⬜ Pending |
-| 3 | Install Falco on BOTH nodes (192.168.1.40 + 192.168.1.41) | ⬜ Pending |
+| 2 | Install kube-bench, Trivy, Helm, cosign, kubesec on k8s-master ($MASTER_IP) | ⬜ Pending |
+| 3 | Install Falco on BOTH nodes ($MASTER_IP + $AGENT_IP) | ⬜ Pending |
 
 Full installation commands in @LABS_ENHANCEMENT.md
 

@@ -8,7 +8,7 @@ These labs require additional tools or components to be installed on the cluster
 
 ### CNI Plugin (Calico)
 - **Required for:** ALL labs (nodes are NotReady without CNI)
-- **Install on:** k8s-master (192.168.1.40)
+- **Install on:** k8s-master ($MASTER_IP)
 - **Command:**
   ```bash
   kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.0/manifests/calico.yaml
@@ -21,7 +21,7 @@ These labs require additional tools or components to be installed on the cluster
 
 ### kube-bench
 - **Required for:** LAB-11 (CIS Benchmark)
-- **Install on:** k8s-master (192.168.1.40)
+- **Install on:** k8s-master ($MASTER_IP)
 - **Method:** Download binary from GitHub releases
   ```bash
   curl -L https://github.com/aquasecurity/kube-bench/releases/latest/download/kube-bench_linux_amd64.tar.gz | tar xz
@@ -31,7 +31,7 @@ These labs require additional tools or components to be installed on the cluster
 
 ### Trivy
 - **Required for:** LAB-10 (Image Scanning)
-- **Install on:** k8s-master (192.168.1.40)
+- **Install on:** k8s-master ($MASTER_IP)
 - **Method:** apt or binary
   ```bash
   curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
@@ -40,7 +40,7 @@ These labs require additional tools or components to be installed on the cluster
 
 ### Falco
 - **Required for:** LAB-09 (Runtime Security)
-- **Install on:** BOTH nodes (192.168.1.40 AND 192.168.1.41)
+- **Install on:** BOTH nodes ($MASTER_IP AND $AGENT_IP)
 - **Method:** Official Falco apt repo
   ```bash
   curl -fsSL https://falco.org/repo/falcosecurity-packages.asc | sudo gpg --dearmor -o /usr/share/keyrings/falco-archive-keyring.gpg
@@ -51,7 +51,7 @@ These labs require additional tools or components to be installed on the cluster
 
 ### Helm
 - **Required for:** cert-manager (LAB-12), Falco operator, Kyverno
-- **Install on:** k8s-master (192.168.1.40)
+- **Install on:** k8s-master ($MASTER_IP)
   ```bash
   curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
   ```
@@ -62,7 +62,7 @@ These labs require additional tools or components to be installed on the cluster
 
 ### cosign
 - **Required for:** LAB-13 (Image Signing & Verification)
-- **Install on:** k8s-master (192.168.1.40)
+- **Install on:** k8s-master ($MASTER_IP)
   ```bash
   curl -Lo cosign https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64
   chmod +x cosign && sudo mv cosign /usr/local/bin/
@@ -71,7 +71,7 @@ These labs require additional tools or components to be installed on the cluster
 
 ### kubesec
 - **Required for:** LAB-14 (Static Analysis)
-- **Install on:** k8s-master (192.168.1.40)
+- **Install on:** k8s-master ($MASTER_IP)
   ```bash
   curl -sSX POST --data-binary @pod.yaml https://v2.kubesec.io/scan
   # or install binary:
@@ -81,7 +81,7 @@ These labs require additional tools or components to be installed on the cluster
 
 ### cert-manager (via Helm)
 - **Required for:** LAB-12 (Ingress TLS with auto-cert)
-- **Install on:** k8s-master (192.168.1.40)
+- **Install on:** k8s-master ($MASTER_IP)
   ```bash
   helm repo add jetstack https://charts.jetstack.io
   helm install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --set crds.enabled=true
@@ -102,7 +102,7 @@ These labs require additional tools or components to be installed on the cluster
 
 ### Istio (for mTLS labs)
 - **Required for:** LAB-17 alternative (Istio mTLS)
-- **Install on:** k8s-master (192.168.1.40)
+- **Install on:** k8s-master ($MASTER_IP)
   ```bash
   curl -L https://istio.io/downloadIstio | sh -
   sudo mv istio-*/bin/istioctl /usr/local/bin/

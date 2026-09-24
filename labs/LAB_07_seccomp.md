@@ -50,12 +50,12 @@ The seccomp directory `/var/lib/kubelet/seccomp/` is **empty** on this cluster.
 
 3. Create the seccomp directory on the worker node:
    ```bash
-   ssh 192.168.1.41 "sudo mkdir -p /var/lib/kubelet/seccomp"
+   ssh $AGENT_IP "sudo mkdir -p /var/lib/kubelet/seccomp"
    ```
 
 4. Create a profile blocking chmod/chown:
    ```bash
-   ssh 192.168.1.41 "sudo tee /var/lib/kubelet/seccomp/deny-chmod.json << 'EOF'
+   ssh $AGENT_IP "sudo tee /var/lib/kubelet/seccomp/deny-chmod.json << 'EOF'
    {
      \"defaultAction\": \"SCMP_ACT_ALLOW\",
      \"syscalls\": [
@@ -70,7 +70,7 @@ The seccomp directory `/var/lib/kubelet/seccomp/` is **empty** on this cluster.
 
 5. Verify the profile is in place:
    ```bash
-   ssh 192.168.1.41 "cat /var/lib/kubelet/seccomp/deny-chmod.json"
+   ssh $AGENT_IP "cat /var/lib/kubelet/seccomp/deny-chmod.json"
    ```
 
 6. Deploy a pod using the localhost profile (force to worker node):
@@ -112,8 +112,8 @@ The seccomp directory `/var/lib/kubelet/seccomp/` is **empty** on this cluster.
 
 9. Profiles can be organized in subdirectories:
    ```bash
-   ssh 192.168.1.41 "sudo mkdir -p /var/lib/kubelet/seccomp/profiles"
-   ssh 192.168.1.41 "sudo cp /var/lib/kubelet/seccomp/deny-chmod.json /var/lib/kubelet/seccomp/profiles/"
+   ssh $AGENT_IP "sudo mkdir -p /var/lib/kubelet/seccomp/profiles"
+   ssh $AGENT_IP "sudo cp /var/lib/kubelet/seccomp/deny-chmod.json /var/lib/kubelet/seccomp/profiles/"
    ```
 
 10. Reference in pod spec:
@@ -128,7 +128,7 @@ The seccomp directory `/var/lib/kubelet/seccomp/` is **empty** on this cluster.
 
 11. Create an audit profile (log all syscalls, don't block):
     ```bash
-    ssh 192.168.1.41 "sudo tee /var/lib/kubelet/seccomp/audit-all.json << 'EOF'
+    ssh $AGENT_IP "sudo tee /var/lib/kubelet/seccomp/audit-all.json << 'EOF'
     {
       \"defaultAction\": \"SCMP_ACT_LOG\"
     }
@@ -159,7 +159,7 @@ The seccomp directory `/var/lib/kubelet/seccomp/` is **empty** on this cluster.
 
 13. Watch syscall logs:
     ```bash
-    ssh 192.168.1.41 "sudo journalctl -k | grep 'type=SECCOMP' | tail -20"
+    ssh $AGENT_IP "sudo journalctl -k | grep 'type=SECCOMP' | tail -20"
     ```
 
 ### Part E — Enable RuntimeDefault cluster-wide
@@ -172,7 +172,7 @@ The seccomp directory `/var/lib/kubelet/seccomp/` is **empty** on this cluster.
     sudo systemctl restart kubelet
 
     # On worker
-    ssh 192.168.1.41 "sudo grep -q seccompDefault /var/lib/kubelet/config.yaml || \
+    ssh $AGENT_IP "sudo grep -q seccompDefault /var/lib/kubelet/config.yaml || \
       echo 'seccompDefault: true' | sudo tee -a /var/lib/kubelet/config.yaml && \
       sudo systemctl restart kubelet"
     ```
@@ -189,7 +189,7 @@ kubectl exec seccomp-custom -- chmod 777 /etc/hostname  # Operation not permitte
 kubectl exec seccomp-custom -- ls /  # Works
 
 # Profile exists on node
-ssh 192.168.1.41 "ls /var/lib/kubelet/seccomp/"
+ssh $AGENT_IP "ls /var/lib/kubelet/seccomp/"
 ```
 
 ## Exam Tips

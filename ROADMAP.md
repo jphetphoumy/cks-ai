@@ -1,7 +1,7 @@
 # CKS Learning Roadmap — Progress Tracker
 
 > Last updated: 2026-02-27
-> Cluster: k8s-master (192.168.1.40) + k8s-agent (192.168.1.41) | K8s v1.35.1
+> Cluster: k8s-master ($MASTER_IP) + k8s-agent ($AGENT_IP) | K8s v1.35.1
 > Exam target: CKS (3-day sprint)
 
 ---
@@ -10,8 +10,8 @@
 
 | Component | Status |
 |-----------|--------|
-| k8s-master (192.168.1.40) | ✅ Ready |
-| k8s-agent (192.168.1.41) | ✅ Ready |
+| k8s-master ($MASTER_IP) | ✅ Ready |
+| k8s-agent ($AGENT_IP) | ✅ Ready |
 | Calico CNI | ✅ Running |
 | kube-bench | ✅ v0.10.1 (master) |
 | trivy | ✅ v0.69.1 (master) |

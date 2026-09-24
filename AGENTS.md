@@ -50,7 +50,10 @@ Base on the PLAN.md, do a focus learning with the user to make them pass the CKS
 All the labs are in the labs folder.
 
 You can access the lab as my user and use sudo on the remote server.
-The labs ip are : 192.168.1.40 and 192.168.1.41.
+The node addresses and SSH user live in `nodes.env` at the repo root (gitignored,
+copied from `nodes.env.example`). Source it — `. ./nodes.env` — then use
+`$MASTER_IP`, `$AGENT_IP` and `$SSH_USER`. Never hardcode the real addresses in
+tracked files.
 The Two servers are VM IaC based, if they break we can recreate them
 
 Using the knowledge you have about my current skill, suggest the lab I need to learn.
